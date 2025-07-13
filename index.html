@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản Lí Bể Cá Cảnh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      /* background: linear-gradient(135deg, #232526 0%, #0f2027 100%); */
+      background: linear-gradient(135deg, #006994 0%, #003f5c 100%);
+      color: #f5f6fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px 32px 16px;
+      flex: 1 0 auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(30, 41, 59, 0.92);
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      margin-bottom: 32px;
+      padding: 0 32px;
+      min-height: 56px;
+      height: 56px;
+      position: relative;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 38px;
+      width: 38px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.10);
+      border: 1.5px solid #00bcd4;
+      margin-right: 10px;
+      padding: 3px;
+    }
+    .logo-wrap img {
+      height: 28px;
+      width: 28px;
+      object-fit: contain;
+      border-radius: 50%;
+      display: block;
+      background: #fff;
+    }
+    .project-title {
+      font-size: 1.18rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      color: #00eaff;
+      margin-bottom: 0;
+      text-shadow: 0 2px 12px #00eaff44, 0 1px 2px #000a;
+      line-height: 1.1;
+    }
+    .team-note {
+      font-size: 0.92rem;
+      color: #b0bec5;
+      font-style: italic;
+      margin-top: 1px;
+      margin-left: 1px;
+      letter-spacing: 0.2px;
+      text-shadow: 0 1px 2px #000a;
+    }
+    .logout-btn {
+      background: #00eaff;
+      color: #232526;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 22px;
+      font-weight: 600;
+      font-size: 1.08rem;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #00eaff33;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+    }
+    .logout-btn:hover {
+      background: #00bcd4;
+      color: #fff;
+    }
+    .dashboard {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .sensor-card {
+      background: rgba(36, 41, 46, 0.92);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,188,212,0.10), 0 1.5px 8px #0006;
+      padding: 22px 18px 16px 18px;
+      min-width: 160px;
+      min-height: 170px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1.5px solid #00bcd455;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .sensor-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 24px 0 #00eaff33, 0 2px 8px #0008;
+      border-color: #00eaff99;
+    }
+    .sensor-label {
+      font-size: 1.08rem;
+      color: #00eaff;
+      margin-bottom: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 8px #00eaff22;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      justify-content: center;
+    }
+    .sensor-icon {
+      font-size: 1.2rem;
+      vertical-align: middle;
+      color: #fff;
+      filter: drop-shadow(0 2px 8px #00eaff44);
+    }
+    .circle-chart-wrap {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      margin-bottom: 8px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .circle-chart {
+      width: 70px;
+      height: 70px;
+      z-index: 1;
+    }
+    .circle-center {
+      position: absolute;
+      top: 0; left: 0; width: 70px; height: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .sensor-value {
+      font-size: 1.55rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 2px 12px #00eaff33, 0 1px 2px #000a;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    .sensor-unit {
+      font-size: 1rem;
+      color: #b0bec5;
+      font-weight: 500;
+      text-shadow: 0 1px 2px #000a;
+      line-height: 1;
+    }
+    .charts-row {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .chart-container {
+      background: rgba(36, 41, 46, 0.92);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,188,212,0.10), 0 1.5px 8px #0006;
+      padding: 18px 12px;
+      min-width: 320px;
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #00bcd455;
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .chart-container h4 {
+      color: #00eaff;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+      text-shadow: 0 2px 8px #00eaff22;
+      text-align: center;
+    }
+    .footer-bar {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.92);
+      color: #b0bec5;
+      text-align: center;
+      padding: 12px 0 10px 0;
+      font-size: 0.98rem;
+      font-style: italic;
+      letter-spacing: 0.2px;
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -2px 12px #0003;
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+    @media (max-width: 900px) {
+      .main-container { padding: 0 4px 24px 4px; }
+      .header-bar { flex-direction: column; gap: 8px; min-height: unset; height: auto; padding: 0 10px;}
+      .dashboard { flex-direction: column; align-items: center; gap: 14px;}
+      .charts-row { flex-direction: column; gap: 14px; }
+      .chart-container { max-width: 100%; min-width: 0; }
+      .logout-btn { margin-left: 0; margin-top: 10px; align-self: flex-end; }
+      .footer-bar { font-size: 0.93rem; }
+    }
+    /* Hình nền hồ cá với nhiều cá và rong rêu */
+    .aquarium-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1516684669134-0df2b8e4cbcd') no-repeat center center/cover;
+      opacity: 0.3;
+      z-index: -1;
+    }
+    /* Hiệu ứng bong bóng */
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: rise 6s infinite ease-in;
+      z-index: 0;
+    }
+    .bubble:nth-child(2) { left: 15%; animation-delay: 0.5s; }
+    .bubble:nth-child(3) { left: 35%; animation-delay: 1.5s; }
+    .bubble:nth-child(4) { left: 55%; animation-delay: 2.5s; }
+    .bubble:nth-child(5) { left: 75%; animation-delay: 3.5s; }
+    .bubble:nth-child(6) { left: 25%; animation-delay: 4s; }
+    .bubble:nth-child(7) { left: 45%; animation-delay: 2s; }
+    @keyframes rise {
+      0% {
+        bottom: -100px;
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(100px);
+      }
+      100% {
+        bottom: 100vh;
+        transform: translateX(-100px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header-bar">
+      <div class="header-left">
+        <span class="logo-wrap">
+          <img src="logotruong.png" alt="Logo">
+        </span>
+        <div>
+          <div class="project-title">Quản Lí Bể Cá Cảnh</div>
+          <div class="team-note">Phát triển bởi T3Y Team 2025</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+    </div>
+
+    <div class="dashboard">
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-thermometer-half sensor-icon"></i> Nhiệt độ nước</div>
+        <div class="circle-chart-wrap">
+          <canvas id="circle-tempDS" class="circle-chart"></canvas>
+          <div class="circle-center">
+            <span class="sensor-value" id="tempDS">--</span>
+            <span class="sensor-unit">°C</span>
+          </div>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-thermometer-sun sensor-icon"></i> Nhiệt độ môi trường</div>
+        <div class="circle-chart-wrap">
+          <canvas id="circle-tempDHT" class="circle-chart"></canvas>
+          <div class="circle-center">
+            <span class="sensor-value" id="tempDHT">--</span>
+            <span class="sensor-unit">°C</span>
+          </div>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-droplet-half sensor-icon"></i> Độ ẩm</div>
+        <div class="circle-chart-wrap">
+          <canvas id="circle-humidity" class="circle-chart"></canvas>
+          <div class="circle-center">
+            <span class="sensor-value" id="humidity">--</span>
+            <span class="sensor-unit">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-rulers sensor-icon"></i> Khoảng cách</div>
+        <div class="circle-chart-wrap">
+          <canvas id="circle-distance" class="circle-chart"></canvas>
+          <div class="circle-center">
+            <span class="sensor-value" id="distance">--</span>
+            <span class="sensor-unit">cm</span>
+          </div>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-droplet sensor-icon"></i> Chỉ số TDS</div>
+        <div class="circle-chart-wrap">
+          <canvas id="circle-tds" class="circle-chart"></canvas>
+          <div class="circle-center">
+            <span class="sensor-value" id="tds">--</span>
+            <span class="sensor-unit">ppm</span>
+          </div>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-lightbulb sensor-icon"></i> Rơ le</div>
+        <div class="circle-chart-wrap" style="height:unset;width:unset;">
+          <span class="sensor-value" id="relayStatus">--</span>
+        </div>
+      </div>
+      <div class="sensor-card">
+        <div class="sensor-label"><i class="bi bi-bell sensor-icon"></i> Còi</div>
+        <div class="circle-chart-wrap" style="height:unset;width:unset;">
+          <span class="sensor-value" id="buzzerStatus">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-container">
+        <h4>Biểu đồ thời gian</h4>
+        <canvas id="sensorChart" height="180"></canvas>
+      </div>
+      <div class="chart-container">
+        <h4>TDS & Độ ẩm</h4>
+        <canvas id="barChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-bar">
+    &copy; 2025 T3Y Team. All rights reserved. | Web quản lý bể cá cảnh
+  </footer>
+
+  <script>
+    document.getElementById('logoutBtn').onclick = function() {
+      window.location.href = "login.html";
+    };
+
+    function createCircleChart(ctx, value, max, color) {
+      return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [value, Math.max(0, max - value)],
+            backgroundColor: [
+              color,
+              'rgba(255,255,255,0.07)'
+            ],
+            borderWidth: 0,
+            cutout: '78%',
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        }
+      });
+    }
+
+    const circleCharts = {
+      tempDS: createCircleChart(document.getElementById('circle-tempDS'), 0, 40, 'rgba(0,234,255,0.95)'),
+      tempDHT: createCircleChart(document.getElementById('circle-tempDHT'), 0, 40, 'rgba(67,233,123,0.95)'),
+      humidity: createCircleChart(document.getElementById('circle-humidity'), 0, 100, 'rgba(251,192,45,0.95)'),
+      distance: createCircleChart(document.getElementById('circle-distance'), 0, 50, 'rgba(255,112,67,0.95)'),
+      tds: createCircleChart(document.getElementById('circle-tds'), 0, 1000, 'rgba(211,47,47,0.95)'),
+    };
+
+    const labels = [];
+    const tempDSData = [];
+    const tempDHTData = [];
+    const humidityData = [];
+    const tdsData = [];
+
+    const ctxLine = document.getElementById('sensorChart').getContext('2d');
+    const grad1 = ctxLine.createLinearGradient(0, 0, 480, 0);
+    grad1.addColorStop(0, "#00eaff");
+    grad1.addColorStop(1, "#00bcd4");
+    const grad2 = ctxLine.createLinearGradient(0, 0, 480, 0);
+    grad2.addColorStop(0, "#43e97b");
+    grad2.addColorStop(1, "#38f9d7");
+    const grad3 = ctxLine.createLinearGradient(0, 0, 480, 0);
+    grad3.addColorStop(0, "#fbc02d");
+    grad3.addColorStop(1, "#fffde4");
+    const grad4 = ctxLine.createLinearGradient(0, 0, 480, 0);
+    grad4.addColorStop(0, "#d32f2f");
+    grad4.addColorStop(1, "#ff6e7f");
+
+    const sensorChart = new Chart(ctxLine, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Nước (°C)',
+            data: tempDSData,
+            borderColor: grad1,
+            backgroundColor: 'rgba(0,234,255,0.10)',
+            tension: 0.45,
+            fill: true,
+            pointRadius: 2,
+            pointBackgroundColor: '#00eaff',
+            pointBorderColor: '#fff',
+            borderWidth: 2
+          },
+          {
+            label: 'MT (°C)',
+            data: tempDHTData,
+            borderColor: grad2,
+            backgroundColor: 'rgba(67,233,123,0.10)',
+            tension: 0.45,
+            fill: true,
+            pointRadius: 2,
+            pointBackgroundColor: '#43e97b',
+            pointBorderColor: '#fff',
+            borderWidth: 2
+          },
+          {
+            label: 'Độ ẩm (%)',
+            data: humidityData,
+            borderColor: grad3,
+            backgroundColor: 'rgba(251,192,45,0.10)',
+            tension: 0.45,
+            fill: true,
+            pointRadius: 2,
+            pointBackgroundColor: '#fbc02d',
+            pointBorderColor: '#fff',
+            borderWidth: 2
+          },
+          {
+            label: 'TDS',
+            data: tdsData,
+            borderColor: grad4,
+            backgroundColor: 'rgba(211,47,47,0.10)',
+            tension: 0.45,
+            fill: true,
+            pointRadius: 2,
+            pointBackgroundColor: '#d32f2f',
+            pointBorderColor: '#fff',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top', labels: { color: '#fff', font: { size: 13, weight: 'bold' } } },
+          title: { display: false }
+        },
+        scales: {
+          x: { title: { display: false }, ticks: { color: '#fff', font: { size: 10 } } },
+          y: { beginAtZero: true, ticks: { color: '#fff', font: { size: 10 } } }
+        }
+      }
+    });
+
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'TDS (ppm)',
+            data: [],
+            backgroundColor: 'rgba(211,47,47,0.85)',
+            borderRadius: 8,
+            maxBarThickness: 28
+          },
+          {
+            label: 'Độ ẩm (%)',
+            data: [],
+            backgroundColor: 'rgba(251,192,45,0.85)',
+            borderRadius: 8,
+            maxBarThickness: 28
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top', labels: { color: '#fff', font: { size: 13, weight: 'bold' } } },
+          title: { display: false }
+        },
+        scales: {
+          x: { ticks: { color: '#fff', font: { size: 10 } }, grid: { color: '#444' } },
+          y: { beginAtZero: true, ticks: { color: '#fff', font: { size: 10 } }, grid: { color: '#444' } }
+        }
+      }
+    });
+
+    function updateSensorUI(data) {
+      document.getElementById('tempDS').textContent = data.tempDS;
+      document.getElementById('tempDHT').textContent = data.tempDHT;
+      document.getElementById('humidity').textContent = data.humidity;
+      document.getElementById('distance').textContent = data.distance;
+      document.getElementById('tds').textContent = data.tds;
+
+      // relay: 0 = TẮT, 1 = BẬT
+      if (Number(data.relay) === 1) {
+        document.getElementById('relayStatus').textContent = "BẬT";
+        document.getElementById('relayStatus').style.color = "#43e97b";
+      } else {
+        document.getElementById('relayStatus').textContent = "TẮT";
+        document.getElementById('relayStatus').style.color = "#d32f2f";
+      }
+
+      // buzzer: 0 = TẮT, 1 = BẬT
+      if (Number(data.buzzer) === 1) {
+        document.getElementById('buzzerStatus').textContent = "BẬT";
+        document.getElementById('buzzerStatus').style.color = "#fbc02d";
+      } else {
+        document.getElementById('buzzerStatus').textContent = "TẮT";
+        document.getElementById('buzzerStatus').style.color = "#b0bec5";
+      }
+
+      circleCharts.tempDS.data.datasets[0].data = [data.tempDS, 40 - data.tempDS];
+      circleCharts.tempDS.update();
+      circleCharts.tempDHT.data.datasets[0].data = [data.tempDHT, 40 - data.tempDHT];
+      circleCharts.tempDHT.update();
+      circleCharts.humidity.data.datasets[0].data = [data.humidity, 100 - data.humidity];
+      circleCharts.humidity.update();
+      circleCharts.distance.data.datasets[0].data = [data.distance, 50 - data.distance];
+      circleCharts.distance.update();
+      circleCharts.tds.data.datasets[0].data = [data.tds, 1000 - data.tds];
+      circleCharts.tds.update();
+
+      const now = new Date();
+      const timeLabel = now.getHours().toString().padStart(2, '0') + ':' +
+                        now.getMinutes().toString().padStart(2, '0') + ':' +
+                        now.getSeconds().toString().padStart(2, '0');
+      labels.push(timeLabel);
+      tempDSData.push(data.tempDS);
+      tempDHTData.push(data.tempDHT);
+      humidityData.push(data.humidity);
+      tdsData.push(data.tds);
+
+      if (labels.length > 20) {
+        labels.shift();
+        tempDSData.shift();
+        tempDHTData.shift();
+        humidityData.shift();
+        tdsData.shift();
+      }
+      sensorChart.update();
+
+      const barLabels = labels.slice(-10);
+      barChart.data.labels = barLabels;
+      barChart.data.datasets[0].data = tdsData.slice(-10);
+      barChart.data.datasets[1].data = humidityData.slice(-10);
+      barChart.update();
+    }
+
+    setInterval(() => {
+      const fakeData = {
+        tempDS: +(24 + Math.random() * 4).toFixed(1),
+        tempDHT: +(27 + Math.random() * 3).toFixed(1),
+        humidity: +(70 + Math.random() * 5).toFixed(1),
+        distance: +(20 + Math.random() * 5).toFixed(1),
+        tds: +(150 + Math.random() * 100).toFixed(0),
+        relay: Math.random() > 0.5 ? 0 : 1,   // 0: BẬT, 1: TẮT
+        buzzer: Math.random() > 0.7 ? 1 : 0   // 1: KÍCH HOẠT, 0: TẮT
+      };
+      updateSensorUI(fakeData);
+    }, 2000);
+  </script>
+  <script type="module">
+    import { db } from './firebase.js';
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    // Lấy dữ liệu trạng thái relay và buzzer từ Firebase
+    const relayRef = ref(db, '/trangthai/relay');
+    const buzzerRef = ref(db, '/trangthai/buzzer');
+
+    onValue(ref(db, '/trangthai'), (snapshot) => {
+      const data = snapshot.val();
+      // ...xử lý như trên...
+    });
+  </script>
+</body>
+</html>
